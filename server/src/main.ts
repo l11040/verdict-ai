@@ -22,6 +22,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
+  // OpenAPI Generator를 위한 JSON 스펙 엔드포인트
+  app.getHttpAdapter().get('/api-json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(document);
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

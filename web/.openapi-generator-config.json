@@ -1,0 +1,12 @@
+{
+  "generatorName": "typescript-axios",
+  "inputSpec": "http://localhost:3333/api-json",
+  "outputDir": "./src/api",
+  "additionalProperties": {
+    "supportsES6": true,
+    "withInterfaces": true,
+    "npmName": "@verdict-ai/api-client",
+    "npmVersion": "1.0.0"
+  }
+}
+

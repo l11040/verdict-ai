@@ -4,13 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run api:generate || echo '⚠️  API 클라이언트 생성 실패 (서버가 실행 중이 아닐 수 있습니다)'",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api:generate": "node scripts/generate-api.mjs",
+    "api:generate:url": "openapi-generator-cli generate -i"
   },
   "dependencies": {
     "@lab/ui": "file:../lab-ui",
+    "axios": "^1.7.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.49.0"
@@ -30,6 +34,8 @@
     "tailwindcss": "^3.4.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "@openapitools/openapi-generator-cli": "^2.15.0",
+    "dotenv": "^16.4.5"
   }
 }
