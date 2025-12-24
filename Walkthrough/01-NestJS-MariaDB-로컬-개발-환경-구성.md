@@ -182,3 +182,4 @@ npm run start:dev
 3. **의존성:** mysql2 패키지 추가 (TypeORM MariaDB 드라이버)
 4. **포트 설정:** .env 파일의 DB_PORT를 docker-compose.yml에서 직접 사용
 5. **스키마 관리:** synchronize: false로 설정하여 모든 스키마 변경은 마이그레이션으로 관리
+
