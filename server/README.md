@@ -42,6 +42,7 @@ DB_USERNAME=your_username
 DB_PASSWORD=your_password
 DB_DATABASE=verdict_db
 PORT=3333
+JWT_SECRET=your-secret-key-change-this-in-production
 ```
 
 3. Create the database in MariaDB:
@@ -165,6 +166,26 @@ docker-compose exec server npm run migration:run
 ```bash
 $ npm install
 ```
+
+## API Documentation (Swagger)
+
+서버를 실행한 후 다음 URL에서 Swagger API 문서를 확인할 수 있습니다:
+
+- Swagger UI: `http://localhost:3333/api`
+
+Swagger 문서에는 다음 내용이 포함됩니다:
+- 모든 API 엔드포인트 목록
+- 요청/응답 스키마
+- 인증 방법 (Bearer Token)
+- API 테스트 기능
+
+### 인증 사용 방법
+
+1. `/auth/register` 엔드포인트로 회원가입
+2. `/auth/login` 엔드포인트로 로그인하여 `access_token` 받기
+3. Swagger UI 우측 상단의 "Authorize" 버튼 클릭
+4. `Bearer {access_token}` 형식으로 토큰 입력
+5. 보호된 엔드포인트 테스트 가능
 
 ## Compile and run the project
 
