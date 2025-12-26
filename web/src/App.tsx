@@ -1,20 +1,27 @@
-import { Button } from '@lab/ui';
+/**
+ * 루트 앱 컴포넌트
+ */
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { routes } from './routers';
+import { QueryProvider } from './lib/query-client';
+
+function AppContent() {
+  return (
+    <Routes>
+      {routes.map((route) => (
+        <Route key={route.path} path={route.path} element={route.element} />
+      ))}
+    </Routes>
+  );
+}
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Verdict AI
-        </h1>
-        <p className="text-gray-600 mb-4">
-          React + TypeScript + TailwindCSS + Vite
-        </p>
-        <Button color="primary" size="2xl">
-          Test Lab UI Button
-        </Button>
-      </div>
-    </div>
+    <QueryProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </QueryProvider>
   );
 }
 

@@ -1,7 +1,8 @@
 /**
  * Axios 인스턴스 생성 및 인터셉터 설정
  */
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import axios from 'axios';
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { apiConfig } from './config';
 
 // Axios 인스턴스 생성
