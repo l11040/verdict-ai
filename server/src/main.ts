@@ -11,6 +11,14 @@ config({ path: resolve(process.cwd(), '.env') });
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS 설정
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   // Swagger 설정
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Verdict AI API')
