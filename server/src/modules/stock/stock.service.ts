@@ -29,12 +29,12 @@ export class StockService {
     startDate?: Date,
     endDate?: Date,
   ): Promise<number> {
-    // 날짜가 지정되지 않으면 오늘 기준 1년치
+    // 날짜가 지정되지 않으면 오늘 기준 5년치
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(today.getFullYear() - 5);
 
-    const requestStartDate = startDate || oneYearAgo;
+    const requestStartDate = startDate || fiveYearsAgo;
     const requestEndDate = endDate || today;
 
     // 날짜 유효성 검사
@@ -401,12 +401,12 @@ export class StockService {
     startDate?: Date,
     endDate?: Date,
   ): Promise<ChartDataResponseDto> {
-    // 날짜가 지정되지 않으면 오늘 기준 1년치
+    // 날짜가 지정되지 않으면 오늘 기준 5년치
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(today.getFullYear() - 5);
 
-    const requestStartDate = startDate || oneYearAgo;
+    const requestStartDate = startDate || fiveYearsAgo;
     const requestEndDate = endDate || today;
 
     // 날짜 정규화
