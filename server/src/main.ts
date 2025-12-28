@@ -26,6 +26,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('auth', '인증 관련 API')
+    .addTag('stocks', '주식 데이터 관련 API')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
