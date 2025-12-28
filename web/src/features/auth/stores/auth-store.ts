@@ -26,7 +26,13 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set: (partial: Partial<AuthState> | ((state: AuthState) => Partial<AuthState>)) => void) => ({
+    (
+      set: (
+        partial:
+          | Partial<AuthState>
+          | ((state: AuthState) => Partial<AuthState>),
+      ) => void,
+    ) => ({
       // 초기 상태
       user: null,
       accessToken: null,
@@ -57,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           accessToken,
           refreshToken,
+          isAuthenticated: true, // 토큰이 있으면 인증된 상태
         });
       },
 
@@ -92,12 +99,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage', // localStorage 키
       partialize: (state: AuthState) => ({
-        user: state.user,
+        // 토큰만 저장하고, 사용자 정보는 /me API로 가져옴
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
-    }
-  )
+    },
+  ),
 );
-

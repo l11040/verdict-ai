@@ -9,9 +9,24 @@ import { ProtectedRoute } from '@/shared/components/protected-route';
 
 // Lazy loading으로 페이지 컴포넌트 로드
 // Feature-based: features/{feature}/pages/{page}
-const LoginPage = lazy(() => import('@/features/auth').then(module => ({ default: module.LoginPage })));
-const RegisterPage = lazy(() => import('@/features/auth').then(module => ({ default: module.RegisterPage })));
-const DashboardPage = lazy(() => import('@/features/dashboard').then(module => ({ default: module.DashboardPage })));
+const LoginPage = lazy(() =>
+  import('@/features/auth').then((module) => ({ default: module.LoginPage })),
+);
+const RegisterPage = lazy(() =>
+  import('@/features/auth').then((module) => ({
+    default: module.RegisterPage,
+  })),
+);
+const StockSearchPage = lazy(() =>
+  import('@/features/stock').then((module) => ({
+    default: module.StockSearchPage,
+  })),
+);
+const StockDetailPage = lazy(() =>
+  import('@/features/stock').then((module) => ({
+    default: module.StockDetailPage,
+  })),
+);
 
 export const routes: RouteObject[] = [
   {
@@ -23,20 +38,19 @@ export const routes: RouteObject[] = [
     element: <RegisterPage />,
   },
   {
-    path: '/dashboard',
+    path: '/',
     element: (
       <ProtectedRoute>
-        <DashboardPage />
+        <StockSearchPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/',
+    path: '/stocks/:symbol',
     element: (
       <ProtectedRoute>
-        <DashboardPage />
+        <StockDetailPage />
       </ProtectedRoute>
     ),
   },
 ];
-

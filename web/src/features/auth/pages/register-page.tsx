@@ -12,7 +12,10 @@ import type { RegisterDto } from '@/api/generated/api';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { registerSchema, type RegisterFormData } from '../schemas/register-schema';
+import {
+  registerSchema,
+  type RegisterFormData,
+} from '../schemas/register-schema';
 import { useRegisterMutation } from '../hooks/use-register-mutation';
 import { cn } from '@/lib/utils';
 import { ParticleBackground } from '../components/particle-background';
@@ -38,13 +41,13 @@ export const RegisterPage = () => {
 
   // 이미 로그인된 경우 대시보드로 리다이렉트
   if (isAuthenticated) {
-    navigate('/dashboard', { replace: true });
+    navigate('/', { replace: true });
     return null;
   }
 
   const onSubmit = (data: RegisterFormData) => {
     clearError();
-    
+
     const registerDto: RegisterDto = {
       email: data.email,
       password: data.password,
@@ -98,7 +101,8 @@ export const RegisterPage = () => {
                     'pl-10 h-12 bg-background border-input text-foreground placeholder:text-muted-foreground',
                     'transition-all duration-200 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2',
                     'hover:border-primary/50',
-                    errors.email && 'border-destructive focus-visible:ring-destructive'
+                    errors.email &&
+                      'border-destructive focus-visible:ring-destructive',
                   )}
                   disabled={registerMutation.isPending}
                 />
@@ -122,7 +126,8 @@ export const RegisterPage = () => {
                     'pl-10 h-12 bg-background border-input text-foreground placeholder:text-muted-foreground',
                     'transition-all duration-200 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2',
                     'hover:border-primary/50',
-                    errors.nickname && 'border-destructive focus-visible:ring-destructive'
+                    errors.nickname &&
+                      'border-destructive focus-visible:ring-destructive',
                   )}
                   disabled={registerMutation.isPending}
                 />
@@ -146,7 +151,8 @@ export const RegisterPage = () => {
                     'pl-10 pr-12 h-12 bg-background border-input text-foreground placeholder:text-muted-foreground',
                     'transition-all duration-200 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2',
                     'hover:border-primary/50',
-                    errors.password && 'border-destructive focus-visible:ring-destructive'
+                    errors.password &&
+                      'border-destructive focus-visible:ring-destructive',
                   )}
                   disabled={registerMutation.isPending}
                 />
@@ -154,7 +160,9 @@ export const RegisterPage = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-all duration-200 p-2 rounded-lg hover:bg-primary/10 dark:text-neutral-400 dark:hover:text-primary-400 dark:hover:bg-primary/20 active:scale-95 z-10 flex items-center justify-center"
-                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                  aria-label={
+                    showPassword ? '비밀번호 숨기기' : '비밀번호 보기'
+                  }
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -179,7 +187,7 @@ export const RegisterPage = () => {
                   'w-full h-12 text-base font-semibold',
                   'bg-primary text-primary-foreground hover:bg-primary/90',
                   'transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]',
-                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
+                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
                 )}
                 disabled={registerMutation.isPending}
               >
@@ -234,4 +242,3 @@ export const RegisterPage = () => {
     </div>
   );
 };
-

@@ -11,6 +11,14 @@ import { useNavigate } from 'react-router-dom';
 interface LoginResponse {
   access_token: string;
   refresh_token: string;
+  user?: {
+    id: number;
+    uid: string;
+    email: string;
+    nickname: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 interface LoginMutationVariables {
@@ -18,7 +26,7 @@ interface LoginMutationVariables {
 }
 
 export const useLoginMutation = () => {
-  const { setAuth, setError } = useAuthStore();
+  const { setTokens, setError } = useAuthStore();
   const navigate = useNavigate();
 
   return useMutation({
@@ -26,24 +34,22 @@ export const useLoginMutation = () => {
       const response = await authApi.authControllerLogin({ loginDto });
       return response.data as LoginResponse;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       const { access_token, refresh_token } = data;
-      
-      // 사용자 정보는 JWT 토큰에서 추출하거나 별도 API 호출 필요
-      // 현재는 이메일만 사용
-      const user = {
-        id: variables.loginDto.email,
-        email: variables.loginDto.email,
-      };
 
-      setAuth(user, access_token, refresh_token);
-      navigate('/dashboard', { replace: true });
+      // 토큰만 저장하고, 사용자 정보는 /me API로 가져옴
+      setTokens(access_token, refresh_token);
+      navigate('/', { replace: true });
     },
     onError: (error: unknown) => {
-      let errorMessage = '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
-      
+      let errorMessage =
+        '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
         errorMessage =
           axiosError.response?.data?.message ||
           axiosError.message ||
@@ -51,9 +57,8 @@ export const useLoginMutation = () => {
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     },
   });
 };
-
