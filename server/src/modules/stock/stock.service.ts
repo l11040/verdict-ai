@@ -5,6 +5,7 @@ import { StockInfo } from '../../entities/stock-info.entity';
 import YahooFinance from 'yahoo-finance2';
 import { StockRepository } from './repositories/stock.repository';
 import { StockInfoRepository } from './repositories/stock-info.repository';
+import { ChartDataResponseDto } from './dto/chart-data.dto';
 
 @Injectable()
 export class StockService {
@@ -386,5 +387,66 @@ export class StockService {
    */
   async getStockInfo(symbol: string): Promise<StockInfo | null> {
     return this.stockInfoRepository.findBySymbol(symbol);
+  }
+
+  /**
+   * 차트 데이터 조회
+   * @param symbol 주식 심볼
+   * @param startDate 시작 날짜 (선택)
+   * @param endDate 종료 날짜 (선택)
+   * @returns 차트 데이터
+   */
+  async getChartData(
+    symbol: string,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<ChartDataResponseDto> {
+    // 날짜가 지정되지 않으면 오늘 기준 1년치
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    const requestStartDate = startDate || oneYearAgo;
+    const requestEndDate = endDate || today;
+
+    // 날짜 정규화
+    const normalizedStartDate = new Date(requestStartDate);
+    normalizedStartDate.setHours(0, 0, 0, 0);
+    const normalizedEndDate = new Date(requestEndDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);
+
+    // 데이터 조회
+    const stocks = await this.stockRepository.findBySymbolAndDateRange(
+      symbol.toUpperCase(),
+      normalizedStartDate,
+      normalizedEndDate,
+    );
+
+    // DTO 형식으로 변환
+    const data = stocks.map((stock) => {
+      // 날짜가 Date 객체가 아니면 변환
+      const date =
+        stock.date instanceof Date
+          ? stock.date
+          : new Date(stock.date as string | number | Date);
+
+      return {
+        date: date.toISOString().split('T')[0],
+        open: Number(stock.open),
+        high: Number(stock.high),
+        low: Number(stock.low),
+        close: Number(stock.close),
+        volume: Number(stock.volume),
+        adjustedClose: Number(stock.adjustedClose),
+      };
+    });
+
+    return {
+      symbol: symbol.toUpperCase(),
+      startDate: normalizedStartDate.toISOString().split('T')[0],
+      endDate: normalizedEndDate.toISOString().split('T')[0],
+      data,
+      count: data.length,
+    };
   }
 }

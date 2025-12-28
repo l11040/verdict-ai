@@ -15,6 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { StockService } from './stock.service';
 import { FetchStockResponseDto } from './dto/fetch-stock-response.dto';
+import { ChartDataResponseDto } from './dto/chart-data.dto';
 
 @ApiTags('stocks')
 @Controller('stocks')
@@ -192,5 +193,88 @@ export class StockController {
       message: '주식 기본 정보를 성공적으로 가져왔습니다.',
       data: stockInfo,
     };
+  }
+
+  @Get(':symbol/chart')
+  @ApiOperation({
+    summary: '주식 차트 데이터 조회',
+    description:
+      '저장된 주식 시세 데이터를 조회하여 차트에 사용할 수 있는 형식으로 반환합니다.',
+  })
+  @ApiParam({
+    name: 'symbol',
+    description: '주식 심볼 (예: AAPL, TSLA)',
+    example: 'AAPL',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description:
+      '시작 날짜 (YYYY-MM-DD 형식). 지정하지 않으면 오늘 기준 1년 전',
+    example: '2024-01-01',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: '종료 날짜 (YYYY-MM-DD 형식). 지정하지 않으면 오늘',
+    example: '2024-12-31',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '차트 데이터 조회 성공',
+    type: ChartDataResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 요청 (유효하지 않은 심볼, 날짜 형식 오류 등)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '차트 데이터를 찾을 수 없음',
+  })
+  async getChartData(
+    @Param('symbol') symbol: string,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
+  ): Promise<ChartDataResponseDto> {
+    if (!symbol || symbol.trim().length === 0) {
+      throw new BadRequestException('주식 심볼이 필요합니다.');
+    }
+
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    // 날짜 파싱
+    if (startDateStr) {
+      startDate = new Date(startDateStr);
+      if (isNaN(startDate.getTime())) {
+        throw new BadRequestException(
+          '시작 날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)',
+        );
+      }
+    }
+
+    if (endDateStr) {
+      endDate = new Date(endDateStr);
+      if (isNaN(endDate.getTime())) {
+        throw new BadRequestException(
+          '종료 날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)',
+        );
+      }
+    }
+
+    const chartData = await this.stockService.getChartData(
+      symbol.toUpperCase(),
+      startDate,
+      endDate,
+    );
+
+    if (chartData.count === 0) {
+      throw new BadRequestException(
+        `심볼 ${symbol}에 대한 차트 데이터를 찾을 수 없습니다. 먼저 데이터를 가져와주세요.`,
+      );
+    }
+
+    return chartData;
   }
 }
