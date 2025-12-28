@@ -47,7 +47,12 @@ export class AuthService {
     return result;
   }
 
-  async login(user: { id: number; email: string }) {
+  async login(user: {
+    id: number;
+    email: string;
+    uid: string;
+    nickname: string;
+  }) {
     const payload = { email: user.email, sub: user.id };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
@@ -57,9 +62,18 @@ export class AuthService {
     // 리프레시 토큰을 DB에 저장
     await this.userService.updateRefreshToken(user.id, refreshToken);
 
+    const foundUser = await this.userService.findById(user.id);
+    if (!foundUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = foundUser;
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
+      user: userWithoutPassword,
     };
   }
 
@@ -121,5 +135,16 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  async getMe(userId: number): Promise<UserWithoutPassword> {
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
