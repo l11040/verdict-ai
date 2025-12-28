@@ -2,7 +2,7 @@
  * 주식 상세 페이지
  * Feature-based Architecture: features/stock/pages/stock-detail-page.tsx
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   RefreshCw,
@@ -21,6 +21,8 @@ import { useCurrencyStore } from '@/stores/currency-store';
 import { formatCurrencyValue, getCurrencySymbol } from '@/lib/currency';
 import { useCurrencyFormat } from '../hooks/use-currency-format';
 import { useToastStore } from '@/lib/toast-store';
+import { DebatePanel } from '@/features/debate';
+import type { DebateStatus } from '@/features/debate/types';
 
 export const StockDetailPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
@@ -28,6 +30,7 @@ export const StockDetailPage = () => {
   const { currency, exchangeRate } = useCurrencyStore();
   const { formatCurrency } = useCurrencyFormat();
   const { addToast } = useToastStore();
+  const [debateStatus, setDebateStatus] = useState<DebateStatus>('idle');
 
   const {
     data: stockInfo,
@@ -35,6 +38,9 @@ export const StockDetailPage = () => {
     error: infoError,
   } = useStockInfo(symbol || null);
   const fetchStockMutation = useFetchStock();
+
+  // 토론 진행 중인지 확인 (idle일 때만 차트/About 표시)
+  const showChartAndAbout = debateStatus === 'idle';
 
   useEffect(() => {
     if (symbol && !infoLoading && !stockInfo && !infoError) {
@@ -293,13 +299,18 @@ export const StockDetailPage = () => {
               )}
             </section>
 
-            {/* 차트 */}
-            <section className="pt-6 border-t border-border/30">
-              <StockChart symbol={symbol} />
-            </section>
+            {/* 차트 - idle 상태일 때만 표시 */}
+            {showChartAndAbout && (
+              <section className="pt-6 border-t border-border/30">
+                <StockChart symbol={symbol} />
+              </section>
+            )}
 
-            {/* 회사 소개 - 미니멀하게 */}
-            {stockData.longBusinessSummary && (
+            {/* AI 투자 토론 패널 */}
+            <DebatePanel symbol={symbol} onStatusChange={setDebateStatus} />
+
+            {/* 회사 소개 - idle 상태일 때만 표시 */}
+            {showChartAndAbout && stockData.longBusinessSummary && (
               <section className="pt-4 border-t border-border/30">
                 <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
                   About
