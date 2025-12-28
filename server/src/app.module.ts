@@ -8,6 +8,7 @@ import databaseConfig from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { StockModule } from './modules/stock/stock.module';
+import { DebateModule } from './modules/debate/debate.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StockModule } from './modules/stock/stock.module';
     UserModule,
     AuthModule,
     StockModule,
+    DebateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

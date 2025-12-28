@@ -6,11 +6,17 @@ import { StockService } from './stock.service';
 import { StockController } from './stock.controller';
 import { StockRepository } from './repositories/stock.repository';
 import { StockInfoRepository } from './repositories/stock-info.repository';
+import { FactSheetBuilderService } from './fact-sheet-builder.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Stock, StockInfo])],
-  providers: [StockService, StockRepository, StockInfoRepository],
+  providers: [
+    StockService,
+    StockRepository,
+    StockInfoRepository,
+    FactSheetBuilderService,
+  ],
   controllers: [StockController],
-  exports: [StockService],
+  exports: [StockService, FactSheetBuilderService],
 })
 export class StockModule {}

@@ -14,6 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: { sub: number; email: string }) {
-    return { userId: payload.sub, email: payload.email };
+    // req.user.id로 접근할 수 있도록 id 속성 추가
+    return { id: payload.sub, userId: payload.sub, email: payload.email };
   }
 }

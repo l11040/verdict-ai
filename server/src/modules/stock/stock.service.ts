@@ -249,7 +249,12 @@ export class StockService {
     const stocks = data.map((item: any) => {
       const stock = new Stock();
       stock.symbol = symbol;
-      stock.date = new Date(item.date as string | number | Date);
+
+      // 날짜 정규화 (시간 제거)
+      const date = new Date(item.date as string | number | Date);
+      date.setHours(0, 0, 0, 0);
+      stock.date = date;
+
       stock.open = item.open ?? 0;
       stock.high = item.high ?? 0;
       stock.low = item.low ?? 0;

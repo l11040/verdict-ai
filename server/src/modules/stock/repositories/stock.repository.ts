@@ -60,31 +60,33 @@ export class StockRepository {
   }
 
   /**
-   * 주식 데이터 일괄 저장 (upsert)
+   * 주식 데이터 일괄 저장 (upsert) - TypeORM upsert 사용
    */
   async upsertMany(stocks: Stock[]): Promise<number> {
-    let savedCount = 0;
-
-    for (const stock of stocks) {
-      const existing = await this.findBySymbolAndDate(stock.symbol, stock.date);
-
-      if (existing) {
-        await this.update(stock.symbol, stock.date, {
-          open: stock.open,
-          high: stock.high,
-          low: stock.low,
-          close: stock.close,
-          volume: stock.volume,
-          adjustedClose: stock.adjustedClose,
-          dividendAmount: stock.dividendAmount,
-          splitCoefficient: stock.splitCoefficient,
-        });
-      } else {
-        await this.save(stock);
-        savedCount++;
-      }
+    if (stocks.length === 0) {
+      return 0;
     }
 
-    return savedCount;
+    // 날짜 정규화 (시간 제거)
+    const normalizedStocks = stocks.map(stock => {
+      const normalizedDate = new Date(stock.date);
+      normalizedDate.setHours(0, 0, 0, 0);
+      return {
+        ...stock,
+        date: normalizedDate,
+      };
+    });
+
+    // TypeORM의 upsert 기능 사용
+    // conflictPaths: 충돌 감지 컬럼 (symbol + date의 복합 unique)
+    // skipUpdateIfNoValuesChanged: 값이 변경되지 않으면 업데이트 스킵
+    await this.repository.upsert(normalizedStocks, {
+      conflictPaths: ['symbol', 'date'],
+      skipUpdateIfNoValuesChanged: true,
+    });
+
+    // upsert는 삽입/업데이트 개수를 정확히 반환하지 않으므로
+    // 처리된 전체 개수를 반환 (로깅 용도)
+    return normalizedStocks.length;
   }
 }

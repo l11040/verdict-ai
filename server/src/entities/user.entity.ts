@@ -28,6 +28,12 @@ export class User {
   @Column({ type: 'varchar', length: 500, nullable: true })
   refreshToken: string | null;
 
+  @Column({ type: 'bigint', default: 0 })
+  totalTokensUsed: number;
+
+  @Column({ type: 'datetime', nullable: true })
+  lastTokenResetAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
