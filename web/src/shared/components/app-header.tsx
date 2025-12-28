@@ -96,22 +96,29 @@ export const AppHeader = ({
           {/* 오른쪽: 통화 + 사용자 정보 */}
           <div className="flex items-center gap-3 shrink-0">
             {/* 통화 전환 */}
-            <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-muted/50 border border-border/50">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCurrencyToggle}
-                className="h-7 px-2 font-medium"
+            <div className="inline-flex rounded-md bg-neutral-100 dark:bg-neutral-800 p-1">
+              <button
+                onClick={() => currency !== 'USD' && handleCurrencyToggle()}
                 disabled={isLoadingRate}
+                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                  currency === 'USD'
+                    ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
+                }`}
               >
-                {currency === 'USD' ? '$' : '₩'}
-                <span className="ml-1 hidden sm:inline">{currency}</span>
-              </Button>
-              {!isLoadingRate && storeRate && (
-                <span className="text-xs text-muted-foreground dark:text-neutral-500 hidden lg:inline border-l border-border/50 pl-2">
-                  1$ = ₩{Math.round(storeRate).toLocaleString()}
-                </span>
-              )}
+                USD
+              </button>
+              <button
+                onClick={() => currency !== 'KRW' && handleCurrencyToggle()}
+                disabled={isLoadingRate}
+                className={`px-3 py-1 text-xs font-medium rounded transition-all ${
+                  currency === 'KRW'
+                    ? 'bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm'
+                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
+                  }`}
+              >
+                KRW
+              </button>
             </div>
 
             {/* 사용자 정보 */}

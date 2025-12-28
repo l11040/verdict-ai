@@ -5,3 +5,4 @@
 export { StockSearchPage } from './pages/stock-search-page';
 export { StockDetailPage } from './pages/stock-detail-page';
 export * from './hooks';
+export * from './components';

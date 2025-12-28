@@ -4,11 +4,19 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { RefreshCw, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import {
+  RefreshCw,
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingUp,
+  BarChart3,
+  DollarSign,
+  Activity,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { AppHeader } from '@/shared/components';
 import { useFetchStock, useStockInfo } from '../hooks';
+import { StockChart } from '../components';
 import { useCurrencyStore } from '@/stores/currency-store';
 import { formatCurrencyValue, getCurrencySymbol } from '@/lib/currency';
 import { useCurrencyFormat } from '../hooks/use-currency-format';
@@ -54,266 +62,252 @@ export const StockDetailPage = () => {
     }
   };
 
+  // stockData 먼저 정의
+  const stockData = stockInfo || fetchStockMutation.data?.stockInfo;
+
   // 전일 종가 대비 변화율 계산
   const priceChange = useMemo(() => {
-    if (!stockInfo?.currentPrice || !stockInfo?.previousClose) return null;
-    const current = Number(stockInfo.currentPrice);
-    const previous = Number(stockInfo.previousClose);
+    if (!stockData?.currentPrice || !stockData?.previousClose) return null;
+    const current = Number(stockData.currentPrice);
+    const previous = Number(stockData.previousClose);
     const change = current - previous;
     const changePercent = (change / previous) * 100;
     return { change, changePercent, isPositive: change >= 0 };
-  }, [stockInfo]);
+  }, [stockData]);
 
   if (!symbol) {
     return (
       <div className="min-h-screen bg-background dark:bg-neutral-950 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">주식 심볼이 없습니다.</p>
-            <Button onClick={() => navigate('/')} className="mt-4">
-              검색 페이지로 돌아가기
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">주식 심볼이 없습니다.</p>
+          <Button onClick={() => navigate('/')} variant="outline">
+            검색 페이지로 돌아가기
+          </Button>
+        </div>
       </div>
     );
   }
 
   const isLoading = infoLoading || fetchStockMutation.isPending;
-  const stockData = stockInfo || fetchStockMutation.data?.stockInfo;
 
   return (
     <div className="min-h-screen bg-background dark:bg-neutral-950">
       <AppHeader showBackButton backButtonLabel="검색으로" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 로딩 상태 */}
         {isLoading && (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">데이터를 불러오는 중...</p>
-            </CardContent>
-          </Card>
+          <div className="flex items-center justify-center py-20">
+            <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">
+              데이터를 불러오는 중...
+            </span>
+          </div>
         )}
 
         {/* 에러 상태 */}
         {!isLoading && infoError && !stockData && (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-destructive mb-4">
-                주식 정보를 불러올 수 없습니다.
-              </p>
-              <Button
-                onClick={handleFetchData}
-                disabled={fetchStockMutation.isPending}
-              >
-                데이터 가져오기
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="text-center py-20">
+            <p className="text-destructive mb-4">
+              주식 정보를 불러올 수 없습니다.
+            </p>
+            <Button
+              onClick={handleFetchData}
+              disabled={fetchStockMutation.isPending}
+            >
+              데이터 가져오기
+            </Button>
+          </div>
         )}
 
         {/* 데이터 표시 */}
         {!isLoading && stockData && (
-          <div className="space-y-6">
-            {/* 헤더 영역: 심볼, 회사명, 현재가, 변화율 */}
-            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  {/* 왼쪽: 심볼 및 회사 정보 */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shrink-0">
-                        <span className="text-white font-bold text-lg">
-                          {symbol.toUpperCase().slice(0, 2)}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-3">
-                          <h1 className="text-3xl font-bold text-foreground dark:text-white">
-                            {symbol.toUpperCase()}
-                          </h1>
-                          {/* 새로고침 버튼 */}
-                          <Button
-                            onClick={handleFetchData}
-                            disabled={fetchStockMutation.isPending}
-                            size="sm"
-                            variant="outline"
-                            className="gap-2 h-9"
-                          >
-                            <RefreshCw
-                              className={`w-4 h-4 ${
-                                fetchStockMutation.isPending
-                                  ? 'animate-spin'
-                                  : ''
-                              }`}
-                            />
-                            <span className="hidden sm:inline">
-                              {fetchStockMutation.isPending
-                                ? '새로고침 중...'
-                                : '새로고침'}
-                            </span>
-                          </Button>
-                        </div>
-                        {stockData.longName && (
-                          <p className="text-base text-muted-foreground dark:text-neutral-400 truncate">
-                            {stockData.longName}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+          <div className="space-y-8">
+            {/* 헤더 영역 - 카드 없이 깔끔하게 */}
+            <header className="border-b border-border/30 pb-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                {/* 왼쪽: 심볼 및 회사 정보 */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground dark:text-white">
+                      {symbol.toUpperCase()}
+                    </h1>
+                    <button
+                      onClick={handleFetchData}
+                      disabled={fetchStockMutation.isPending}
+                      className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                      title="새로고침"
+                    >
+                      <RefreshCw
+                        className={`w-4 h-4 text-neutral-500 ${
+                          fetchStockMutation.isPending ? 'animate-spin' : ''
+                        }`}
+                      />
+                    </button>
                   </div>
+                  {stockData.longName && (
+                    <p className="text-lg text-muted-foreground dark:text-neutral-400">
+                      {stockData.longName}
+                    </p>
+                  )}
+                </div>
 
-                  {/* 오른쪽: 현재가 및 변화율 */}
-                  {stockData.currentPrice && (
-                    <div className="text-right">
-                      <p className="text-4xl font-bold text-foreground dark:text-white mb-1">
-                        {formatCurrency(stockData.currentPrice)}
-                      </p>
-                      {priceChange && (
-                        <div
-                          className={`flex items-center gap-1.5 justify-end ${
-                            priceChange.isPositive
-                              ? 'text-green-600 dark:text-green-400'
-                              : 'text-red-600 dark:text-red-400'
-                          }`}
-                        >
-                          {priceChange.isPositive ? (
-                            <ArrowUpRight className="w-4 h-4" />
-                          ) : (
-                            <ArrowDownRight className="w-4 h-4" />
+                {/* 오른쪽: 현재가 및 변화율 */}
+                {stockData.currentPrice && (
+                  <div className="text-left sm:text-right">
+                    <p className="text-4xl font-bold tracking-tight text-foreground dark:text-white">
+                      {formatCurrency(stockData.currentPrice)}
+                    </p>
+                    {priceChange && (
+                      <div
+                        className={`flex items-center gap-1 sm:justify-end mt-1 ${
+                          priceChange.isPositive
+                            ? 'text-emerald-500'
+                            : 'text-rose-500'
+                        }`}
+                      >
+                        {priceChange.isPositive ? (
+                          <ArrowUpRight className="w-4 h-4" />
+                        ) : (
+                          <ArrowDownRight className="w-4 h-4" />
+                        )}
+                        <span className="font-medium">
+                          {priceChange.isPositive ? '+' : ''}
+                          {getCurrencySymbol(currency)}
+                          {formatCurrencyValue(
+                            Math.abs(priceChange.change),
+                            currency,
+                            exchangeRate,
                           )}
-                          <span className="font-semibold">
-                            {priceChange.isPositive ? '+' : ''}
-                            {getCurrencySymbol(currency)}
-                            {formatCurrencyValue(
-                              Math.abs(priceChange.change),
-                              currency,
-                              exchangeRate,
-                            )}
-                          </span>
-                          <span className="font-semibold">
+                          <span className="ml-1 text-sm">
                             ({priceChange.isPositive ? '+' : ''}
                             {priceChange.changePercent.toFixed(2)}%)
                           </span>
-                        </div>
-                      )}
-                      {stockData.previousClose && (
-                        <p className="text-sm text-muted-foreground dark:text-neutral-500 mt-1">
-                          전일 종가: {formatCurrency(stockData.previousClose)}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </header>
 
-            {/* 주요 지표 카드 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* 주요 지표 - 인라인 스타일로 간결하게 */}
+            <section className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               {stockData.dayLow && stockData.dayHigh && (
-                <Card className="bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-muted-foreground dark:text-neutral-400 mb-1">
-                      일일 변동폭
-                    </p>
-                    <p className="text-sm font-semibold dark:text-white">
-                      {getCurrencySymbol(currency)}
-                      {formatCurrencyValue(
-                        Number(stockData.dayLow),
-                        currency,
-                        exchangeRate,
-                      )}{' '}
-                      - {getCurrencySymbol(currency)}
-                      {formatCurrencyValue(
-                        Number(stockData.dayHigh),
-                        currency,
-                        exchangeRate,
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      오늘
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground dark:text-white">
+                    {getCurrencySymbol(currency)}
+                    {formatCurrencyValue(
+                      Number(stockData.dayLow),
+                      currency,
+                      exchangeRate,
+                    )}
+                    <span className="text-muted-foreground mx-1">—</span>
+                    {getCurrencySymbol(currency)}
+                    {formatCurrencyValue(
+                      Number(stockData.dayHigh),
+                      currency,
+                      exchangeRate,
+                    )}
+                  </p>
+                </div>
               )}
 
               {stockData.volume && (
-                <Card className="bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-muted-foreground dark:text-neutral-400 mb-1">
+                <div className="group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       거래량
-                    </p>
-                    <p className="text-sm font-semibold dark:text-white">
-                      {Number(stockData.volume).toLocaleString()}
-                    </p>
-                  </CardContent>
-                </Card>
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground dark:text-white">
+                    {Number(stockData.volume).toLocaleString()}
+                  </p>
+                </div>
               )}
 
               {stockData.marketCap && (
-                <Card className="bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-muted-foreground dark:text-neutral-400 mb-1">
+                <div className="group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       시가총액
-                    </p>
-                    {currency === 'USD' ? (
-                      <p className="text-sm font-semibold dark:text-white">
-                        $
-                        {(
-                          Number(stockData.marketCap) / 1_000_000_000_000
-                        ).toFixed(2)}
-                        T
-                      </p>
-                    ) : (
-                      <p className="text-sm font-semibold dark:text-white">
-                        ₩
-                        {(
-                          (Number(stockData.marketCap) * exchangeRate) /
-                          1_000_000_000_000
-                        ).toFixed(2)}
-                        T
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground dark:text-white">
+                    {(() => {
+                      const marketCapUSD =
+                        currency === 'USD'
+                          ? Number(stockData.marketCap)
+                          : Number(stockData.marketCap) * exchangeRate;
+
+                      const formatKoreanNumber = (num: number) => {
+                        const trillion = 1_000_000_000_000;
+                        const hundredMillion = 100_000_000;
+
+                        if (num >= trillion) {
+                          return `${(num / trillion).toFixed(1)}조`;
+                        } else {
+                          return `${Math.round(num / hundredMillion)}억`;
+                        }
+                      };
+
+                      return `${formatKoreanNumber(marketCapUSD)}${
+                        currency === 'USD' ? '달러' : '원'
+                      }`;
+                    })()}
+                  </p>
+                </div>
               )}
 
               {stockData.fiftyTwoWeekLow && stockData.fiftyTwoWeekHigh && (
-                <Card className="bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-muted-foreground dark:text-neutral-400 mb-1">
-                      52주 변동폭
-                    </p>
-                    <p className="text-sm font-semibold dark:text-white">
-                      {getCurrencySymbol(currency)}
-                      {formatCurrencyValue(
-                        Number(stockData.fiftyTwoWeekLow),
-                        currency,
-                        exchangeRate,
-                      )}{' '}
-                      - {getCurrencySymbol(currency)}
-                      {formatCurrencyValue(
-                        Number(stockData.fiftyTwoWeekHigh),
-                        currency,
-                        exchangeRate,
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* 회사 소개 */}
-            {stockData.longBusinessSummary && (
-              <Card className="bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm border-border/50 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg dark:text-white">
-                    회사 소개
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-foreground dark:text-neutral-300 leading-relaxed">
-                    {stockData.longBusinessSummary}
+                <div className="group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      52주
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground dark:text-white">
+                    {getCurrencySymbol(currency)}
+                    {formatCurrencyValue(
+                      Number(stockData.fiftyTwoWeekLow),
+                      currency,
+                      exchangeRate,
+                    )}
+                    <span className="text-muted-foreground mx-1">—</span>
+                    {getCurrencySymbol(currency)}
+                    {formatCurrencyValue(
+                      Number(stockData.fiftyTwoWeekHigh),
+                      currency,
+                      exchangeRate,
+                    )}
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              )}
+            </section>
+
+            {/* 차트 */}
+            <section className="pt-6 border-t border-border/30">
+              <StockChart symbol={symbol} />
+            </section>
+
+            {/* 회사 소개 - 미니멀하게 */}
+            {stockData.longBusinessSummary && (
+              <section className="pt-4 border-t border-border/30">
+                <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                  About
+                </h2>
+                <p className="text-sm text-foreground/80 dark:text-neutral-300 leading-relaxed max-w-3xl">
+                  {stockData.longBusinessSummary}
+                </p>
+              </section>
             )}
           </div>
         )}
